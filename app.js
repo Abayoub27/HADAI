@@ -15605,7 +15605,7 @@ function LoginScreen({
     }
   }, ["Privacidad", "Aviso Legal", "Términos"][i]))))));
 }
-export default function App() {
+function App() {
   const [session, setSession] = useState(null);
   const [needConsent, setNeedConsent] = useState(false);
   const [pendingRole, setPendingRole] = useState(null);
@@ -15652,3 +15652,5 @@ export default function App() {
     onLogout: () => setSession(null)
   }));
 }
+
+window.App = App;

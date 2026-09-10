@@ -13,31 +13,31 @@
     #loading{position:fixed;inset:0;background:linear-gradient(135deg,#0D4A62,#1A6B8A);display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;gap:16px;z-index:9999;transition:opacity 0.5s;}
     .spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,0.2);border-top:4px solid white;border-radius:50%;animation:spin 0.8s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
-    h1{font-size:24px;font-weight:800;}
-    p{font-size:13px;opacity:0.8;}
   </style>
 </head>
 <body>
   <div id="loading">
     <div class="spinner"></div>
-    <h1>🏥 CuidaEnCasa HAD</h1>
-    <p>Cargando plataforma...</p>
+    <h1 style="font-size:24px;font-weight:800">🏥 CuidaEnCasa HAD</h1>
+    <p style="font-size:13px;opacity:0.8">Cargando plataforma...</p>
   </div>
   <div id="root"></div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="./app.js"></script>
   <script>
-    window.addEventListener('load',()=>{
-      try{
-        const root=ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(App));
-        setTimeout(()=>{const l=document.getElementById('loading');if(l)l.style.opacity='0';setTimeout(()=>{if(l)l.remove();},500);},1000);
-      }catch(e){
-        document.getElementById('loading').innerHTML='<h1>Error al cargar</h1><p>'+e.message+'</p>';
-        console.error(e);
-      }
-    });
+    try {
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(React.createElement(window.App));
+      setTimeout(()=>{
+        const l = document.getElementById('loading');
+        if(l){ l.style.opacity='0'; setTimeout(()=>l.remove(), 500); }
+      }, 800);
+    } catch(e) {
+      document.getElementById('loading').innerHTML =
+        '<h1 style="font-size:20px">Error al cargar</h1><p style="margin-top:8px;font-size:13px">' + e.message + '</p>';
+      console.error(e);
+    }
   </script>
 </body>
 </html>
