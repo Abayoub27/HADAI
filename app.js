@@ -11300,6 +11300,292 @@ function PatientApp({
     msg: "✅ Datos guardados"
   }), /*#__PURE__*/React.createElement(SOSButton, null));
 }
+const ROLE_CFG = {
+  admin: {
+    label: "Administrador",
+    color: "#0D4A62",
+    bg: "#E8F4F8",
+    icon: "🛡️"
+  },
+  medico: {
+    label: "Médico",
+    color: "#1A6B8A",
+    bg: "#E8F4F8",
+    icon: "🩺"
+  },
+  enfermero: {
+    label: "Enfermero/a",
+    color: "#2D9B6F",
+    bg: "#E6F7F2",
+    icon: "💉"
+  },
+  coordinador: {
+    label: "Coordinador/a",
+    color: "#E07A3A",
+    bg: "#FEF3E8",
+    icon: "📋"
+  },
+  paciente: {
+    label: "Paciente",
+    color: "#E07A3A",
+    bg: "#FEF3E8",
+    icon: "👤"
+  },
+  t_ocupacional: {
+    label: "T. Ocupacional",
+    color: "#0D9488",
+    bg: "#CCFBF1",
+    icon: "🧩"
+  },
+  fisioterapeuta: {
+    label: "Fisioterapeuta",
+    color: "#D97706",
+    bg: "#FEF3C7",
+    icon: "🏃"
+  },
+  trabajo_social: {
+    label: "Trabajadora Social",
+    color: "#BE185D",
+    bg: "#FCE7F3",
+    icon: "🤝"
+  }
+};
+const INIT_USERS = [{
+  id: 1,
+  name: "Dr. Pérez González",
+  email: "perez@cuidaencasa.es",
+  role: "medico",
+  zone: "norte",
+  status: "activo",
+  patients: 2,
+  lastLogin: "Hoy 08:30"
+}, {
+  id: 2,
+  name: "Enf. Rodríguez López",
+  email: "rodriguez@cuidaencasa.es",
+  role: "enfermero",
+  zone: "norte",
+  status: "activo",
+  patients: 2,
+  lastLogin: "Hoy 07:45"
+}, {
+  id: 3,
+  name: "Dr. Martín Sanz",
+  email: "martin@cuidaencasa.es",
+  role: "medico",
+  zone: "izda",
+  status: "activo",
+  patients: 1,
+  lastLogin: "Hoy 09:15"
+}, {
+  id: 4,
+  name: "Enf. García Vidal",
+  email: "garcia@cuidaencasa.es",
+  role: "enfermero",
+  zone: "izda",
+  status: "activo",
+  patients: 1,
+  lastLogin: "Hoy 08:00"
+}, {
+  id: 5,
+  name: "Sara López",
+  email: "lopez@cuidaencasa.es",
+  role: "coordinador",
+  zone: "todas",
+  status: "activo",
+  patients: 0,
+  lastLogin: "Hoy 07:45"
+}, {
+  id: 6,
+  name: "Admin Principal",
+  email: "admin@cuidaencasa.es",
+  role: "admin",
+  zone: "todas",
+  status: "activo",
+  patients: 0,
+  lastLogin: "Hoy 11:00"
+}, {
+  id: 7,
+  name: "T.O. Sánchez",
+  email: "sanchez@cuidaencasa.es",
+  role: "t_ocupacional",
+  zone: "norte",
+  status: "activo",
+  patients: 2,
+  lastLogin: "Hoy 08:30"
+}, {
+  id: 8,
+  name: "Fisio. Navarro",
+  email: "navarro@cuidaencasa.es",
+  role: "fisioterapeuta",
+  zone: "norte",
+  status: "activo",
+  patients: 3,
+  lastLogin: "Hoy 09:10"
+}, {
+  id: 9,
+  name: "T.S. Morales",
+  email: "morales@cuidaencasa.es",
+  role: "trabajo_social",
+  zone: "todas",
+  status: "activo",
+  patients: 4,
+  lastLogin: "Ayer 16:45"
+}];
+function useConfirm() {
+  const [state, setState] = useState(null);
+  const confirm = opts => new Promise(resolve => {
+    setState({
+      ...opts,
+      resolve
+    });
+  });
+  const handleConfirm = () => {
+    state.resolve(true);
+    setState(null);
+  };
+  const handleCancel = () => {
+    state.resolve(false);
+    setState(null);
+  };
+  const modal = state ? /*#__PURE__*/React.createElement(ConfirmModal, {
+    ...state,
+    onConfirm: handleConfirm,
+    onCancel: handleCancel
+  }) : null;
+  return {
+    confirm,
+    modal
+  };
+}
+function useAuditLog() {
+  const [log, setLog] = usePersistedState("had_audit", INIT_AUDIT);
+  const addEntry = useCallback((type, detail, patient = null, user = "Sistema") => {
+    const entry = {
+      id: Date.now(),
+      ts: new Date().toISOString(),
+      user,
+      role: "sistema",
+      type,
+      patient,
+      detail,
+      read: false
+    };
+    setLog(p => [entry, ...p].slice(0, 500)); // keep last 500 entries
+  }, [setLog]);
+  const markRead = id => setLog(p => p.map(e => e.id === id ? {
+    ...e,
+    read: true
+  } : e));
+  const markAllRead = () => setLog(p => p.map(e => ({
+    ...e,
+    read: true
+  })));
+  const unread = log.filter(e => !e.read).length;
+  return {
+    log,
+    addEntry,
+    markRead,
+    markAllRead,
+    unread
+  };
+}
+function ConfirmModal({
+  title,
+  message,
+  confirmLabel = "Confirmar",
+  confirmColor = C.crit,
+  onConfirm,
+  onCancel,
+  icon = "⚠️"
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.55)",
+      zIndex: 3000,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "16px",
+      animation: "fadeIn 0.15s"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: C.w,
+      borderRadius: "20px",
+      maxWidth: "400px",
+      width: "100%",
+      boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "24px 24px 0",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "56px",
+      height: "56px",
+      borderRadius: "50%",
+      background: confirmColor + "15",
+      border: `2px solid ${confirmColor}30`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: "0 auto 14px",
+      fontSize: "24px"
+    }
+  }, icon), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 8px",
+      fontWeight: "800",
+      fontSize: "17px",
+      color: C.tx
+    }
+  }, title), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 20px",
+      fontSize: "13px",
+      color: C.txL,
+      lineHeight: "1.6"
+    }
+  }, message)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: "10px",
+      padding: "0 24px 24px"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: onCancel,
+    style: {
+      flex: 1,
+      padding: "11px",
+      borderRadius: "12px",
+      border: `1px solid ${C.g200}`,
+      background: C.w,
+      color: C.g800,
+      fontWeight: "600",
+      fontSize: "14px",
+      cursor: "pointer"
+    }
+  }, "Cancelar"), /*#__PURE__*/React.createElement("button", {
+    onClick: onConfirm,
+    style: {
+      flex: 1,
+      padding: "11px",
+      borderRadius: "12px",
+      border: "none",
+      background: confirmColor,
+      color: "white",
+      fontWeight: "700",
+      fontSize: "14px",
+      cursor: "pointer"
+    }
+  }, confirmLabel))));
+}
 function StaffApp({
   onLogout
 }) {
@@ -12031,128 +12317,6 @@ const VSel = ({
 }, children), /*#__PURE__*/React.createElement(FieldError, {
   msg: error
 }));
-function ConfirmModal({
-  title,
-  message,
-  confirmLabel = "Confirmar",
-  confirmColor = C.crit,
-  onConfirm,
-  onCancel,
-  icon = "⚠️"
-}) {
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      inset: 0,
-      background: "rgba(0,0,0,0.55)",
-      zIndex: 3000,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "16px",
-      animation: "fadeIn 0.15s"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: C.w,
-      borderRadius: "20px",
-      maxWidth: "400px",
-      width: "100%",
-      boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-      overflow: "hidden"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "24px 24px 0",
-      textAlign: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: "56px",
-      height: "56px",
-      borderRadius: "50%",
-      background: confirmColor + "15",
-      border: `2px solid ${confirmColor}30`,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      margin: "0 auto 14px",
-      fontSize: "24px"
-    }
-  }, icon), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 8px",
-      fontWeight: "800",
-      fontSize: "17px",
-      color: C.tx
-    }
-  }, title), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 20px",
-      fontSize: "13px",
-      color: C.txL,
-      lineHeight: "1.6"
-    }
-  }, message)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: "10px",
-      padding: "0 24px 24px"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: onCancel,
-    style: {
-      flex: 1,
-      padding: "11px",
-      borderRadius: "12px",
-      border: `1px solid ${C.g200}`,
-      background: C.w,
-      color: C.g800,
-      fontWeight: "600",
-      fontSize: "14px",
-      cursor: "pointer"
-    }
-  }, "Cancelar"), /*#__PURE__*/React.createElement("button", {
-    onClick: onConfirm,
-    style: {
-      flex: 1,
-      padding: "11px",
-      borderRadius: "12px",
-      border: "none",
-      background: confirmColor,
-      color: "white",
-      fontWeight: "700",
-      fontSize: "14px",
-      cursor: "pointer"
-    }
-  }, confirmLabel))));
-}
-function useConfirm() {
-  const [state, setState] = useState(null);
-  const confirm = opts => new Promise(resolve => {
-    setState({
-      ...opts,
-      resolve
-    });
-  });
-  const handleConfirm = () => {
-    state.resolve(true);
-    setState(null);
-  };
-  const handleCancel = () => {
-    state.resolve(false);
-    setState(null);
-  };
-  const modal = state ? /*#__PURE__*/React.createElement(ConfirmModal, {
-    ...state,
-    onConfirm: handleConfirm,
-    onCancel: handleCancel
-  }) : null;
-  return {
-    confirm,
-    modal
-  };
-}
 function SavedBanner({
   msg = "✅ Guardado correctamente"
 }) {
@@ -12495,38 +12659,6 @@ const INIT_AUDIT = [{
   detail: "Nota de evolución registrada (143 palabras)",
   read: true
 }];
-function useAuditLog() {
-  const [log, setLog] = usePersistedState("had_audit", INIT_AUDIT);
-  const addEntry = useCallback((type, detail, patient = null, user = "Sistema") => {
-    const entry = {
-      id: Date.now(),
-      ts: new Date().toISOString(),
-      user,
-      role: "sistema",
-      type,
-      patient,
-      detail,
-      read: false
-    };
-    setLog(p => [entry, ...p].slice(0, 500)); // keep last 500 entries
-  }, [setLog]);
-  const markRead = id => setLog(p => p.map(e => e.id === id ? {
-    ...e,
-    read: true
-  } : e));
-  const markAllRead = () => setLog(p => p.map(e => ({
-    ...e,
-    read: true
-  })));
-  const unread = log.filter(e => !e.read).length;
-  return {
-    log,
-    addEntry,
-    markRead,
-    markAllRead,
-    unread
-  };
-}
 function AuditPanel({
   log,
   onMarkRead,
