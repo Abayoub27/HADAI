@@ -4,7 +4,6 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
   <title>CuidaEnCasa HAD</title>
-  <meta name="description" content="Plataforma digital de Hospitalización a Domicilio"/>
   <meta name="theme-color" content="#1A6B8A"/>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
@@ -30,12 +29,12 @@
       const root = ReactDOM.createRoot(document.getElementById('root'));
       root.render(React.createElement(window.App));
       setTimeout(()=>{
-        const l = document.getElementById('loading');
-        if(l){ l.style.opacity='0'; setTimeout(()=>l.remove(), 500); }
-      }, 800);
+        const l=document.getElementById('loading');
+        if(l){l.style.opacity='0';setTimeout(()=>l.remove(),500);}
+      },800);
     } catch(e) {
-      document.getElementById('loading').innerHTML =
-        '<h1 style="font-size:20px">Error al cargar</h1><p style="margin-top:8px;font-size:13px">' + e.message + '</p>';
+      document.getElementById('loading').innerHTML=
+        '<h1 style="font-size:20px">Error</h1><p style="margin-top:8px;font-size:13px">'+e.message+'</p>';
       console.error(e);
     }
   </script>
