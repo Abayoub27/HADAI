@@ -37,21 +37,23 @@
   </div>
   <div id="root"></div>
 
-  <!-- React + Babel -->
+  <!-- React UMD (no bundler needed) -->
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 
-  <script type="text/babel" src="./app.jsx" data-presets="react"></script>
+  <!-- Compiled app (esbuild, no Babel needed) -->
+  <script src="./app.js"></script>
 
   <script>
-    // Hide loading screen once React mounts
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const loading = document.getElementById('loading');
-        if (loading) loading.style.display = 'none';
-      }, 1500);
-    });
+    // Mount React app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(window.App));
+
+    // Hide loading screen once mounted
+    setTimeout(() => {
+      const loading = document.getElementById('loading');
+      if (loading) loading.style.display = 'none';
+    }, 800);
   </script>
 </body>
 </html>
